@@ -38,3 +38,4 @@ hs_err_pid*
 .project
 .settings/
 *.launch
+/src/main/java/hohserg/elegant/networking/test/
