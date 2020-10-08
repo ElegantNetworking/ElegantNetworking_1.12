@@ -40,7 +40,6 @@ public class Main {
             SetMultimap<String, ASMDataTable.ASMData> annotationsFor = event.getAsmData().getAnnotationsFor(modContainer);
             if (annotationsFor != null) {
                 Set<ASMDataTable.ASMData> asmData = annotationsFor.get("hohserg.elegant.networking.api.ElegantPacket");
-                Comparator<ASMDataTable.ASMData> comparing = getAsmDataComparator(modContainer.getSource());
 
                 List<ASMDataTable.ASMData> rawPackets =
                         asmData.stream()
@@ -52,7 +51,6 @@ public class Main {
                                         return false;
                                     }
                                 })
-                                .sorted(comparing)
                                 .collect(toList());
 
                 if (rawPackets.size() > 0) {
@@ -64,8 +62,7 @@ public class Main {
 
                     packets.stream().map(p -> p.channel).forEach(channelsToRegister::add);
 
-                    for (int i = 0; i < packets.size(); i++) {
-                        ElegantNetworking.PacketInfo p = packets.get(i);
+                    for (ElegantNetworking.PacketInfo p : packets) {
                         String packetPath = p.className.substring(0, p.className.lastIndexOf('.')).replace('.', '/');
                         Optional<? extends Class<?>> maybeSerializer =
                                 listResources(packetPath, f -> f.endsWith(".class")).stream()
@@ -101,7 +98,7 @@ public class Main {
         return Arrays.stream(cl.getGenericInterfaces()).anyMatch(i -> i.getTypeName().equals("hohserg.elegant.networking.impl.ISerializer<" + className + ">"));
     }
 
-    public static List<String> listResources(String folder, Predicate<String> filter) {
+    private static List<String> listResources(String folder, Predicate<String> filter) {
         String normalizedFolder = normalize(folder);
         List<String> r = new ArrayList<>();
 
@@ -125,38 +122,6 @@ public class Main {
         return folder.replace("\\\\", "\\");
     }
 
-
-    private Comparator<ASMDataTable.ASMData> getAsmDataComparator(File source) {
-        if (source.isFile()) {
-            try {
-                ZipFile zipFile = new ZipFile(source);
-                ZipEntry entry = zipFile.getEntry("META-INF/fml_cache_annotation.json");
-
-
-                if (entry != null) {
-                    String jsonContent = IOUtils.toString(zipFile.getInputStream(entry), StandardCharsets.UTF_8);
-
-                    JsonParser parser = new JsonParser();
-                    JsonObject obj = parser.parse(jsonContent).getAsJsonObject();
-                    Set<String> classNames = obj.entrySet().stream().map(Map.Entry::getKey).collect(toSet());
-
-                    List<String> classOrder =
-                            Arrays.stream(jsonContent.split("\\r?\\n"))
-                                    .filter(l -> l.matches("  \\\".+\\\": \\{"))
-                                    .filter(classNames::contains)
-                                    .collect(toList());
-                    Map<String, Integer> indexByClass = IntStream.range(0, classOrder.size())
-                            .boxed()
-                            .collect(toMap(classOrder::get, Function.identity()));
-                    System.out.println(classOrder);
-                    return Comparator.comparing(o -> indexByClass.get(o.getClassName()));
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return Comparator.comparing(ASMDataTable.ASMData::getClassName);
-    }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
