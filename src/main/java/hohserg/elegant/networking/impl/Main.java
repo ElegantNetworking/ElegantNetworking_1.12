@@ -1,12 +1,9 @@
 package hohserg.elegant.networking.impl;
 
 import com.google.common.collect.SetMultimap;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import hohserg.elegant.networking.api.ClientToServerPacket;
 import hohserg.elegant.networking.api.ServerToClientPacket;
-import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ModContainer;
@@ -14,18 +11,10 @@ import net.minecraftforge.fml.common.discovery.ASMDataTable;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import static java.util.stream.Collectors.*;
 
@@ -33,16 +22,18 @@ import static java.util.stream.Collectors.*;
 public class Main {
 
     private static Set<String> channelsToRegister = new HashSet<>();
+    public static Logger log;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) throws ClassNotFoundException {
+        log = event.getModLog();
+
         for (ModContainer modContainer : Loader.instance().getActiveModList()) {
             SetMultimap<String, ASMDataTable.ASMData> annotationsFor = event.getAsmData().getAnnotationsFor(modContainer);
             if (annotationsFor != null) {
-                Set<ASMDataTable.ASMData> asmData = annotationsFor.get("hohserg.elegant.networking.api.ElegantPacket");
 
                 List<ASMDataTable.ASMData> rawPackets =
-                        asmData.stream()
+                        annotationsFor.get("hohserg.elegant.networking.api.ElegantPacket").stream()
                                 .filter(a -> {
                                     try {
                                         return Arrays.stream(Class.forName(a.getClassName()).getInterfaces()).anyMatch(i -> i == ClientToServerPacket.class || i == ServerToClientPacket.class);
@@ -52,6 +43,22 @@ public class Main {
                                     }
                                 })
                                 .collect(toList());
+
+                Map<String, Class> rawSerializers = annotationsFor.get("hohserg.elegant.networking.impl.SerializerMark").stream()
+                        .flatMap(a -> {
+                            try {
+                                return Stream.of(Class.forName(a.getClassName()));
+                            } catch (ClassNotFoundException e) {
+                                e.printStackTrace();
+                                return Stream.empty();
+                            }
+                        })
+                        .filter(aClass -> Arrays.stream(aClass.getInterfaces()).anyMatch(i -> i == ISerializer.class))
+                        .collect(toMap(
+                                cl -> cl.getAnnotation(SerializerMark.class).packetClass().getCanonicalName(),
+                                cl -> cl));
+
+                log.debug("rawSerializers " + rawSerializers);
 
                 if (rawPackets.size() > 0) {
 
@@ -63,63 +70,23 @@ public class Main {
                     packets.stream().map(p -> p.channel).forEach(channelsToRegister::add);
 
                     for (ElegantNetworking.PacketInfo p : packets) {
-                        String packetPath = p.className.substring(0, p.className.lastIndexOf('.')).replace('.', '/');
-                        Optional<? extends Class<?>> maybeSerializer =
-                                listResources(packetPath, f -> f.endsWith(".class")).stream()
-                                        .map(f -> f.substring(1, f.lastIndexOf('.')).replace('/', '.'))
-                                        .flatMap(className -> {
-                                            try {
-                                                return Stream.of(Class.forName(className));
-                                            } catch (ClassNotFoundException e) {
-                                                return Stream.empty();
-                                            }
-                                        })
-                                        .filter(cl -> isSerializer(cl, p.className))
-                                        .findAny();
-                        if (maybeSerializer.isPresent()) {
+                        Class maybeSerializer = rawSerializers.get(p.className);
+                        if (maybeSerializer != null) {
                             try {
-                                ISerializer o = (ISerializer) maybeSerializer.get().newInstance();
-                                System.out.println("Register packet " + ChatFormatting.AQUA + Class.forName(p.className).getSimpleName() + ChatFormatting.RESET + " for channel " + ChatFormatting.AQUA + p.channel + ChatFormatting.RESET + " with id " + o.packetId());
+                                ISerializer o = (ISerializer) maybeSerializer.newInstance();
+                                log.info("Register packet " + ChatFormatting.AQUA + Class.forName(p.className).getSimpleName() + ChatFormatting.RESET + " for channel " + ChatFormatting.AQUA + p.channel + ChatFormatting.RESET + " with id " + o.packetId());
                                 ElegantNetworking.register(p, o);
                             } catch (InstantiationException | IllegalAccessException e) {
-                                System.out.println("Unable to instantiate serializer " + maybeSerializer.get().getName() + " for packet" + ChatFormatting.AQUA + Class.forName(p.className).getSimpleName() + ChatFormatting.RESET + " for channel " + ChatFormatting.AQUA + p.channel);
+                                log.error("Unable to instantiate serializer " + maybeSerializer.getName() + " for packet" + ChatFormatting.AQUA + Class.forName(p.className).getSimpleName() + ChatFormatting.RESET + " for channel " + ChatFormatting.AQUA + p.channel);
                                 e.printStackTrace();
                             }
                         } else
-                            System.out.println("Not found serializer for packet" + ChatFormatting.AQUA + Class.forName(p.className).getSimpleName() + ChatFormatting.RESET + " for channel " + ChatFormatting.AQUA + p.channel);
+                            log.error("Not found serializer for packet " + ChatFormatting.AQUA + Class.forName(p.className).getSimpleName() + ChatFormatting.RESET + " for channel " + ChatFormatting.AQUA + p.channel);
 
                     }
                 }
             }
         }
-    }
-
-    private boolean isSerializer(Class cl, String className) {
-        return Arrays.stream(cl.getGenericInterfaces()).anyMatch(i -> i.getTypeName().equals("hohserg.elegant.networking.impl.ISerializer<" + className + ">"));
-    }
-
-    private static List<String> listResources(String folder, Predicate<String> filter) {
-        String normalizedFolder = normalize(folder);
-        List<String> r = new ArrayList<>();
-
-        CraftingHelper.findFiles(Loader.instance().activeModContainer(), normalizedFolder.substring(1, normalizedFolder.length() - 1), null, (root, resource) -> {
-            String filename = root.relativize(resource).toString();
-            if (filter.test(filename)) {
-                r.add(normalizedFolder + filename);
-            }
-
-            return true;
-        }, true, true);
-
-        return r;
-    }
-
-    private static String normalize(String folder) {
-        if (!folder.startsWith("/"))
-            folder = "/" + folder;
-        if (!folder.endsWith("/"))
-            folder = folder + "/";
-        return folder.replace("\\\\", "\\");
     }
 
 
