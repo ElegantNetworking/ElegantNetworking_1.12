@@ -39,13 +39,23 @@ repositories {
     }
 }
 
+configurations{
+    extraLibs
+}
+
 dependencies {
     compile "codechicken:CodeChickenLib:1.12.2-3.2.3.358:universal"
     compileOnly 'org.projectlombok:lombok:1.18.8'
     compile project(':ElegantNetworkingCommon')
+    extraLibs project(':ElegantNetworkingCommon')
     //compileOnly project(':ElegantNetworkingAnnotationProcessor')
     apt 'org.projectlombok:lombok:1.18.8', project(':ElegantNetworkingAnnotationProcessor')
+}
 
+jar {
+    from {
+        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 
 processResources {
