@@ -54,6 +54,12 @@ dependencies {
     apt 'org.projectlombok:lombok:1.18.8', project(':ElegantNetworkingAnnotationProcessor')
 }
 
+compileJava {
+    options.compilerArgs += [
+            '-Aelegantnetworking.printDetails'
+    ]
+}
+
 jar {
     from {
         configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
