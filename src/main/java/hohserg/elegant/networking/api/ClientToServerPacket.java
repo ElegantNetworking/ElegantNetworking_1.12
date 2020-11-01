@@ -14,6 +14,9 @@ public interface ClientToServerPacket extends IByteBufSerializable {
      */
     void onReceive(EntityPlayerMP player);
 
+    /**
+     * Use it for send packet instance to server
+     */
     default void sendToServer() {
         ElegantNetworking.getNetwork().sendToServer(this);
     }

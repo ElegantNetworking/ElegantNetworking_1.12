@@ -13,8 +13,6 @@ public interface IByteBufSerializable {
     /**
      * Serialize this packet to ByteBuf
      * for send by net
-     *
-     * @return ByteBuf representation
      */
     default void serialize(ByteBuf acc) {
         throw new UnsupportedOperationException("Default implementation: need to override serialize method and unserialization constructor");
