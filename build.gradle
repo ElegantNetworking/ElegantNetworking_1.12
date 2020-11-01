@@ -18,6 +18,8 @@ buildscript {
 apply plugin: "net.minecraftforge.gradle.forge"
 apply plugin: 'java'
 apply plugin: 'net.ltgt.apt'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 sourceCompatibility = 1.8
 
@@ -46,7 +48,7 @@ configurations{
 dependencies {
     compile "codechicken:CodeChickenLib:1.12.2-3.2.3.358:universal"
     compileOnly 'org.projectlombok:lombok:1.18.8'
-    compile project(':ElegantNetworkingCommon')
+    compileOnly project(':ElegantNetworkingCommon')
     extraLibs project(':ElegantNetworkingCommon')
     //compileOnly project(':ElegantNetworkingAnnotationProcessor')
     apt 'org.projectlombok:lombok:1.18.8', project(':ElegantNetworkingAnnotationProcessor')
@@ -56,6 +58,7 @@ jar {
     from {
         configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
     }
+    exclude('hohserg/elegant/networking/test/**')
 }
 
 processResources {
@@ -71,4 +74,76 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude "mcmod.info"
     }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+    exclude('hohserg/elegant/networking/test/**')
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+    exclude('hohserg/elegant/networking/test/**')
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+publishing {
+    repositories {
+        maven {
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            url = releasesRepoUrl
+            credentials {
+                username = "$ossrhUsername"
+                password = "$ossrhPassword"
+            }
+        }
+    }
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId 'elegant-networking-1.12'
+            from components.java
+
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name = 'ElegantNetworking MinecraftForge 1.12 library'
+                packaging = 'jar'
+                description = 'This is a runtime library of ElegantNetworking for MinecraftForge 1.12'
+                url = 'https://github.com/ElegantNetworking/ElegantNetworkingRoot'
+
+                scm {
+                    connection = 'scm:git:https://github.com/ElegantNetworking/ElegantNetworking_1.12.git'
+                    developerConnection = 'scm:git:git@github.com:https://github.com/ElegantNetworking/ElegantNetworking_1.12.git'
+                    url = 'https://github.com/ElegantNetworking/ElegantNetworking_1.12'
+                }
+
+                licenses {
+                    license {
+                        name = 'GNU Lesser General Public License v3.0'
+                        url = 'https://raw.githubusercontent.com/ElegantNetworking/ElegantNetworking_1.12/master/LICENSE.md'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'hohserg'
+                        name = 'hohserg'
+                        email = 'hohserg1@yandex.ru'
+                    }
+                }
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
 }
