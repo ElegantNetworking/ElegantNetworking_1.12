@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
 
-@Mod(modid = "elegant_networking", name = "ElegantNetworking", version = "1.0")
+@Mod(modid = "elegant_networking", name = "ElegantNetworking")
 public class Main {
 
     private static Set<String> channelsToRegister = new HashSet<>();

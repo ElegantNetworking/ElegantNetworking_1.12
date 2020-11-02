@@ -10,7 +10,7 @@
     "authorList": [
       "hohserg"
     ],
-    "credits": "Thx Dahaka for discussions",
+    "credits": "Thx Dahaka for discussions \nThx @tox1cozZ for drew my attention to the annotations processors \nThx @Plasticable for advice about using 4.4.1 version of gradle \nThx @Icosider for consulting on setting up a gradle",
     "logoFile": "",
     "screenshots": [],
     "dependencies": []
