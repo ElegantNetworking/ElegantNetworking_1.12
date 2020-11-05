@@ -18,7 +18,7 @@ buildscript {
 apply plugin: "net.minecraftforge.gradle.forge"
 apply plugin: 'java'
 apply plugin: 'net.ltgt.apt'
-apply plugin: 'maven-publish'
+apply plugin: 'maven'
 apply plugin: 'signing'
 
 sourceCompatibility = 1.8
@@ -41,7 +41,7 @@ repositories {
     }
 }
 
-configurations{
+configurations {
     extraLibs
 }
 
@@ -99,31 +99,27 @@ artifacts {
     archives javadocJar
 }
 
-publishing {
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
     repositories {
-        maven {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-            url = releasesRepoUrl
-            credentials {
-                username = "$ossrhUsername"
-                password = "$ossrhPassword"
+            repository(url: releasesRepoUrl/*'file://localhost/' + new File(project.getProjectDir(),'repo').getAbsolutePath()*/){
+                authentication userName: "$ossrhUsername", password: "$ossrhPassword"
             }
-        }
-    }
-    publications {
-        mavenJava(MavenPublication) {
-            artifactId 'elegant-networking-1.12'
-            from components.java
 
-            artifact sourcesJar
-            artifact javadocJar
-
-            pom {
-                name = 'ElegantNetworking MinecraftForge 1.12 library'
-                packaging = 'jar'
-                description = 'This is a runtime library of ElegantNetworking for MinecraftForge 1.12'
-                url = 'https://github.com/ElegantNetworking/ElegantNetworkingRoot'
+            pom.artifactId = 'elegant-networking-1.12'
+            pom.project {
+                name 'ElegantNetworking MinecraftForge 1.12 library'
+                packaging 'jar'
+                description 'This is a runtime library of ElegantNetworking for MinecraftForge 1.12'
+                url 'https://github.com/ElegantNetworking/ElegantNetworkingRoot'
 
                 scm {
                     connection = 'scm:git:https://github.com/ElegantNetworking/ElegantNetworking_1.12.git'
@@ -148,8 +144,4 @@ publishing {
             }
         }
     }
-}
-
-signing {
-    sign publishing.publications.mavenJava
 }
