@@ -18,9 +18,9 @@ public interface Network<PacketRepresentation> {
 
     void sendToServer(ClientToServerPacket clientToServerPacket);
 
-    void onReceiveClient(PacketRepresentation packetRepresent);
+    void onReceiveClient(PacketRepresentation packetRepresent, String channel);
 
-    void onReceiveServer(PacketRepresentation packetRepresent, EntityPlayerMP player);
+    void onReceiveServer(PacketRepresentation packetRepresent, EntityPlayerMP player, String channel);
 
     void registerChannel(String channel);
 

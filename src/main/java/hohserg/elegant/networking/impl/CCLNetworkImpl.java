@@ -46,9 +46,9 @@ public class CCLNetworkImpl implements Network<PacketCustom> {
 
     private PacketCustom preparePacket(IByteBufSerializable packet) {
         String packetClassName = packet.getClass().getName();
-        ISerializer serializer = ElegantNetworking.serializerByPacketClassName.get(packetClassName);
-        String channel = ElegantNetworking.channelByPacketClassName.get(packetClassName);
-        Integer id = ElegantNetworking.packetIdByPacketClassName.get(packetClassName);
+        ISerializer serializer = ElegantNetworking.getSerializer(packetClassName);
+        String channel = ElegantNetworking.getChannelForPacket(packetClassName);
+        Integer id = ElegantNetworking.getPacketId(packetClassName);
         PacketCustom packetCustom = new PacketCustom(channel, id);
 
         ByteBuf buffer = Unpooled.buffer();
@@ -60,29 +60,29 @@ public class CCLNetworkImpl implements Network<PacketCustom> {
     }
 
     @Override
-    public void onReceiveClient(PacketCustom packetRepresent) {
-        this.<ServerToClientPacket>readObjectFromPacket(packetRepresent)
+    public void onReceiveClient(PacketCustom packetRepresent, String channel) {
+        this.<ServerToClientPacket>readObjectFromPacket(packetRepresent, channel)
                 .onReceive(Minecraft.getMinecraft());
     }
 
     @Override
-    public void onReceiveServer(PacketCustom packetRepresent, EntityPlayerMP player) {
-        this.<ClientToServerPacket>readObjectFromPacket(packetRepresent)
+    public void onReceiveServer(PacketCustom packetRepresent, EntityPlayerMP player, String channel) {
+        this.<ClientToServerPacket>readObjectFromPacket(packetRepresent, channel)
                 .onReceive(player);
     }
 
-    private <A> A readObjectFromPacket(PacketCustom packetRepresent) {
+    private <A> A readObjectFromPacket(PacketCustom packetRepresent, String channel) {
         int size = packetRepresent.readShort();
         ByteBuf buffer = Unpooled.buffer(size);
         packetRepresent.readBytes(buffer, size);
 
-        return (A) ElegantNetworking.serializerByPacketClassName.get(ElegantNetworking.packetClassNameById.get(packetRepresent.getType())).unserialize(buffer);
+        return (A) ElegantNetworking.getSerializer(ElegantNetworking.getPacketName(channel, packetRepresent.getType())).unserialize(buffer);
     }
 
     @Override
     public void registerChannel(String channel) {
         if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
-            PacketCustom.assignHandler(channel, (ICustomPacketHandler.IClientPacketHandler) (packet, mc, handler) -> onReceiveClient(packet));
-        PacketCustom.assignHandler(channel, (ICustomPacketHandler.IServerPacketHandler) (packet, sender, handler) -> onReceiveServer(packet, sender));
+            PacketCustom.assignHandler(channel, (ICustomPacketHandler.IClientPacketHandler) (packet, mc, handler) -> onReceiveClient(packet, channel));
+        PacketCustom.assignHandler(channel, (ICustomPacketHandler.IServerPacketHandler) (packet, sender, handler) -> onReceiveServer(packet, sender, channel));
     }
 }
