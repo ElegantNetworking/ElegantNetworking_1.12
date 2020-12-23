@@ -8,9 +8,11 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -79,7 +81,7 @@ public class ForgeNetworkImpl implements Network<ForgeNetworkImpl.UniversalPacke
     @Override
     public void onReceiveClient(UniversalPacket packetRepresent, String channel) {
         this.<ServerToClientPacket>readObjectFromPacket(packetRepresent, channel)
-                .onReceive(Minecraft.getMinecraft());
+                .onReceive(mc());
     }
 
     @Override
@@ -100,12 +102,21 @@ public class ForgeNetworkImpl implements Network<ForgeNetworkImpl.UniversalPacke
         channels.put(channel, simpleNetworkWrapper);
 
         simpleNetworkWrapper.registerMessage((message, ctx) -> {
-            onReceiveClient(message, channel);
+            if (!mc().isCallingFromMinecraftThread())
+                mc().addScheduledTask(() -> onReceiveClient(message, channel));
+            else
+                onReceiveClient(message, channel);
+
             return null;
         }, ServerToClientUniversalPacket.class, 0, Side.CLIENT);
 
         simpleNetworkWrapper.registerMessage((message, ctx) -> {
-            onReceiveServer(message, ctx.getServerHandler().player, channel);
+            MinecraftServer mc = FMLCommonHandler.instance().getMinecraftServerInstance();
+            if (!mc.isCallingFromMinecraftThread())
+                mc.addScheduledTask(() -> onReceiveServer(message, ctx.getServerHandler().player, channel));
+            else
+                onReceiveServer(message, ctx.getServerHandler().player, channel);
+
             return null;
         }, ClientToServerUniversalPacket.class, 0, Side.SERVER);
     }
@@ -149,5 +160,9 @@ public class ForgeNetworkImpl implements Network<ForgeNetworkImpl.UniversalPacke
             buf.writeByte(id);
             ElegantNetworking.getSerializer(packet.getClass().getName()).serialize(packet, buf);
         }
+    }
+
+    public static Minecraft mc() {
+        return Minecraft.getMinecraft();
     }
 }
