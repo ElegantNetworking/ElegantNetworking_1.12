@@ -41,15 +41,10 @@ repositories {
     }
 }
 
-configurations {
-    extraLibs
-}
-
 dependencies {
     compile "codechicken:CodeChickenLib:1.12.2-3.2.3.358:universal"
     compileOnly 'org.projectlombok:lombok:1.18.8'
-    compileOnly project(':ElegantNetworkingCommon')
-    extraLibs project(':ElegantNetworkingCommon')
+    compile project(':ElegantNetworkingCommon')
     //compileOnly project(':ElegantNetworkingAnnotationProcessor')
     apt 'org.projectlombok:lombok:1.18.8', project(':ElegantNetworkingAnnotationProcessor')
 }
@@ -61,10 +56,8 @@ compileJava {
 }
 
 jar {
-    from {
-        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    exclude('hohserg/elegant/networking/test/**')
+    if (!testBuild)
+        exclude('hohserg/elegant/networking/test/**')
 }
 
 processResources {
@@ -143,6 +136,9 @@ uploadArchives {
                         email = 'hohserg1@yandex.ru'
                     }
                 }
+            }
+            pom.whenConfigured {
+                p -> p.dependencies=[]
             }
         }
     }

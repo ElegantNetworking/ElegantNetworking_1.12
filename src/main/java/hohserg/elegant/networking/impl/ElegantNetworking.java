@@ -1,10 +1,13 @@
 package hohserg.elegant.networking.impl;
 
 import lombok.Value;
+import net.minecraftforge.fml.common.Loader;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ElegantNetworking {
 
@@ -15,6 +18,10 @@ public class ElegantNetworking {
 
     static String getChannelForPacket(String className) {
         return channelByPacketClassName.get(className);
+    }
+
+    static List<String> getPacketsForChannel(String channel) {
+        return channelByPacketClassName.entrySet().stream().filter(i -> i.getValue().equals(channel)).map(Map.Entry::getKey).collect(Collectors.toList());
     }
 
     static int getPacketId(String className) {
@@ -29,7 +36,7 @@ public class ElegantNetworking {
         return serializerByPacketClassName.get(className);
     }
 
-    private static Network defaultImpl = new CCLNetworkImpl();
+    private static Network defaultImpl = Loader.isModLoaded("codechickenlib") ? new CCLNetworkImpl() : new ForgeNetworkImpl();
 
     public static Network getNetwork() {
         return defaultImpl;
