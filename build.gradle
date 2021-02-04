@@ -147,7 +147,7 @@ uploadArchives {
                 }
             }
             pom.whenConfigured {
-                p -> p.dependencies=[]
+                p -> p.dependencies = []
             }
         }
     }

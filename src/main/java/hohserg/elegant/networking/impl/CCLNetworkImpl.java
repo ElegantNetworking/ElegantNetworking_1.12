@@ -14,6 +14,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 
 public class CCLNetworkImpl implements Network<PacketCustom> {
+
     @Override
     public void sendToPlayer(ServerToClientPacket serverToClientPacket, EntityPlayerMP player) {
         preparePacket(serverToClientPacket).sendToPlayer(player);
