@@ -47,7 +47,7 @@ public class CCLNetworkImpl implements Network<PacketCustom> {
 
     private PacketCustom preparePacket(IByteBufSerializable packet) {
         String packetClassName = packet.getClass().getName();
-        ISerializer serializer = ElegantNetworking.getSerializer(packetClassName);
+        ISerializerBase serializer = ElegantNetworking.getSerializer(packetClassName);
         String channel = ElegantNetworking.getChannelForPacket(packetClassName);
         Integer id = ElegantNetworking.getPacketId(packetClassName);
         PacketCustom packetCustom = new PacketCustom(channel, id);

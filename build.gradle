@@ -47,10 +47,10 @@ configurations {
 
 dependencies {
     compile "codechicken:CodeChickenLib:1.12.2-3.2.3.358:universal"
-    
-    compile project(':ElegantNetworkingCommon')
+
+    compile(project(':ElegantNetworkingCommon')) { transitive = false }
     extraLibs project(':ElegantNetworkingCommon')
-    
+
     compileOnly 'org.projectlombok:lombok:1.18.8'
     annotationProcessor 'org.projectlombok:lombok:1.18.8', project(':ElegantNetworkingAnnotationProcessor')
 }
