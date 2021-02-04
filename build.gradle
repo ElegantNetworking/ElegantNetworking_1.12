@@ -52,7 +52,7 @@ dependencies {
     extraLibs project(':ElegantNetworkingCommon')
     
     compileOnly 'org.projectlombok:lombok:1.18.8'
-    apt 'org.projectlombok:lombok:1.18.8', project(':ElegantNetworkingAnnotationProcessor')
+    annotationProcessor 'org.projectlombok:lombok:1.18.8', project(':ElegantNetworkingAnnotationProcessor')
 }
 
 compileJava {
