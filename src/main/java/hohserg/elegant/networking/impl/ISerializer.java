@@ -12,9 +12,6 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 public interface ISerializer<Packet> extends ISerializerBase<Packet> {
-    void serialize(Packet value, ByteBuf acc);
-
-    Packet unserialize(ByteBuf buf);
 
     default void serialize_NBTTagCompound_Generic(NBTTagCompound value, ByteBuf acc) {
         ByteBufUtils.writeTag(acc, value);
