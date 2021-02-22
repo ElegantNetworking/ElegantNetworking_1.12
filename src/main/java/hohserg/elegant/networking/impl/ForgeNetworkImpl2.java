@@ -72,7 +72,7 @@ public class ForgeNetworkImpl2 implements Network<ByteBuf> {
     @Override
     public void onReceiveServer(ByteBuf packetRepresent, EntityPlayerMP player, String channel) {
         int id = packetRepresent.readByte();
-        ((ClientToServerPacket) ElegantNetworking.getSerializer(ElegantNetworking.getPacketName(channel, id)).unserialize(packetRepresent)).onReceive(player);
+        ((ClientToServerPacket) Registry.getSerializer(Registry.getPacketName(channel, id)).unserialize(packetRepresent)).onReceive(player);
     }
 
     private Map<String, FMLEventChannel> channels = new HashMap<>();
