@@ -50,8 +50,8 @@ public class ForgeNetworkImpl2 implements Network<ByteBuf> {
     private FMLProxyPacket preparePacket(IByteBufSerializable serverToClientPacket) {
         String name = serverToClientPacket.getClass().getName();
         ByteBuf acc = Unpooled.buffer();
-        ElegantNetworking.getSerializer(name).serialize(serverToClientPacket, acc);
-        return new FMLProxyPacket(new PacketBuffer(acc), ElegantNetworking.getChannelForPacket(name));
+        Registry.getSerializer(name).serialize(serverToClientPacket, acc);
+        return new FMLProxyPacket(new PacketBuffer(acc), Registry.getChannelForPacket(name));
     }
 
     @Override
@@ -60,13 +60,13 @@ public class ForgeNetworkImpl2 implements Network<ByteBuf> {
     }
 
     private FMLEventChannel getChannel(IByteBufSerializable serverToClientPacket) {
-        return channels.get(ElegantNetworking.getChannelForPacket(serverToClientPacket.getClass().getName()));
+        return channels.get(Registry.getChannelForPacket(serverToClientPacket.getClass().getName()));
     }
 
     @Override
     public void onReceiveClient(ByteBuf packetRepresent, String channel) {
         int id = packetRepresent.readByte();
-        ((ServerToClientPacket) ElegantNetworking.getSerializer(ElegantNetworking.getPacketName(channel, id)).unserialize(packetRepresent)).onReceive(Minecraft.getMinecraft());
+        ((ServerToClientPacket) Registry.getSerializer(Registry.getPacketName(channel, id)).unserialize(packetRepresent)).onReceive(Minecraft.getMinecraft());
     }
 
     @Override
