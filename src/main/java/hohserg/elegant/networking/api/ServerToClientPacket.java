@@ -4,6 +4,8 @@ import hohserg.elegant.networking.impl.Network;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  * Base interface for packet, which can be send from server to client
@@ -14,6 +16,7 @@ public interface ServerToClientPacket extends IByteBufSerializable {
      *
      * @param mc Minecraft class instance
      */
+    @SideOnly(Side.CLIENT)
     void onReceive(Minecraft mc);
 
     /**
