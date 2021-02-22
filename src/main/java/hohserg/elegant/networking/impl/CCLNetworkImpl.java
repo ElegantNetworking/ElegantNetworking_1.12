@@ -46,10 +46,12 @@ public class CCLNetworkImpl implements Network<PacketCustom> {
     }
 
     private PacketCustom preparePacket(IByteBufSerializable packet) {
+        checkSendingSide(packet);
+
         String packetClassName = packet.getClass().getName();
-        ISerializerBase serializer = ElegantNetworking.getSerializer(packetClassName);
-        String channel = ElegantNetworking.getChannelForPacket(packetClassName);
-        Integer id = ElegantNetworking.getPacketId(packetClassName);
+        ISerializerBase serializer = Registry.getSerializer(packetClassName);
+        String channel = Registry.getChannelForPacket(packetClassName);
+        Integer id = Registry.getPacketId(packetClassName);
         PacketCustom packetCustom = new PacketCustom(channel, id);
 
         ByteBuf buffer = Unpooled.buffer();

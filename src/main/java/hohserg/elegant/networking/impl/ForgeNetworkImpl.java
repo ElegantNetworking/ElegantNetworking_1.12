@@ -27,8 +27,9 @@ public class ForgeNetworkImpl implements Network<ForgeNetworkImpl.UniversalPacke
         getChannel(serverToClientPacket).sendTo(preparePacket(serverToClientPacket), player);
     }
 
-    private SimpleNetworkWrapper getChannel(IByteBufSerializable serverToClientPacket) {
-        return channels.get(ElegantNetworking.getChannelForPacket(serverToClientPacket.getClass().getName()));
+    private SimpleNetworkWrapper getChannel(IByteBufSerializable packet) {
+        checkSendingSide(packet);
+        return channels.get(Registry.getChannelForPacket(packet.getClass().getName()));
     }
 
     @Override
