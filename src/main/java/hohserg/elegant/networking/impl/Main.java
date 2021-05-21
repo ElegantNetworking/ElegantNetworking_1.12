@@ -13,10 +13,12 @@ import java.util.stream.Collectors;
 public class Main {
 
     public static Logger log;
+    public static Config config;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         log = event.getModLog();
+        config = Init.initConfig(event.getModConfigurationDirectory());
     }
 
     @Mod.EventHandler
@@ -26,6 +28,7 @@ public class Main {
                         .stream()
                         .map(mod -> new Init.ModInfo(mod.getModId(), mod.getSource()))
                         .collect(Collectors.toList()),
+                log::info,
                 log::error,
                 Network.getNetwork()::registerChannel
         );
