@@ -6,12 +6,23 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 public interface ISerializer<Packet> extends ISerializerBase<Packet> {
+
+    default void serialize_BlockPos_Generic(BlockPos value, ByteBuf acc) {
+        acc.writeInt(value.getX());
+        acc.writeInt(value.getY());
+        acc.writeInt(value.getZ());
+    }
+
+    default BlockPos unserialize_BlockPos_Generic(ByteBuf buf) {
+        return new BlockPos(buf.readInt(), buf.readInt(), buf.readInt());
+    }
 
     default void serialize_NBTTagCompound_Generic(NBTTagCompound value, ByteBuf acc) {
         ByteBufUtils.writeTag(acc, value);
