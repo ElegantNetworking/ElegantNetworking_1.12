@@ -28,8 +28,16 @@ public interface ISerializer<Packet> extends ISerializerBase<Packet> {
         ByteBufUtils.writeTag(acc, value);
     }
 
+    default NBTTagCompound unserialize_NBTTagCompound_Generic(ByteBuf buf) {
+        return ByteBufUtils.readTag(buf);
+    }
+
     default void serialize_ItemStack_Generic(ItemStack value, ByteBuf acc) {
         ByteBufUtils.writeItemStack(acc, value);
+    }
+
+    default ItemStack unserialize_ItemStack_Generic(ByteBuf buf) {
+        return ByteBufUtils.readItemStack(buf);
     }
 
     default void serialize_FluidStack_Generic(FluidStack value, ByteBuf acc) {
@@ -40,31 +48,6 @@ public interface ISerializer<Packet> extends ISerializerBase<Packet> {
             serialize_NBTTagCompound_Generic(value.tag, acc);
         } else
             acc.writeByte(0);
-    }
-
-    default void serialize_Item_Generic(Item value, ByteBuf acc) {
-        acc.writeShort(Item.getIdFromItem(value));
-    }
-
-    default void serialize_Block_Generic(Block value, ByteBuf acc) {
-        acc.writeShort(Block.getIdFromBlock(value));
-    }
-
-    default void serialize_Fluid_Generic(Fluid value, ByteBuf acc) {
-        serialize_String_Generic(FluidRegistry.getFluidName(value), acc);
-    }
-
-    default void serialize_ResourceLocation_Generic(ResourceLocation value, ByteBuf acc) {
-        serialize_String_Generic(value.toString(), acc);
-    }
-
-
-    default NBTTagCompound unserialize_NBTTagCompound_Generic(ByteBuf buf) {
-        return ByteBufUtils.readTag(buf);
-    }
-
-    default ItemStack unserialize_ItemStack_Generic(ByteBuf buf) {
-        return ByteBufUtils.readItemStack(buf);
     }
 
     default FluidStack unserialize_FluidStack_Generic(ByteBuf buf) {
@@ -78,16 +61,32 @@ public interface ISerializer<Packet> extends ISerializerBase<Packet> {
             return null;
     }
 
+    default void serialize_Item_Generic(Item value, ByteBuf acc) {
+        acc.writeShort(Item.getIdFromItem(value));
+    }
+
     default Item unserialize_Item_Generic(ByteBuf buf) {
         return Item.getItemById(buf.readShort());
+    }
+
+    default void serialize_Block_Generic(Block value, ByteBuf acc) {
+        acc.writeShort(Block.getIdFromBlock(value));
     }
 
     default Block unserialize_Block_Generic(ByteBuf buf) {
         return Block.getBlockById(buf.readShort());
     }
 
+    default void serialize_Fluid_Generic(Fluid value, ByteBuf acc) {
+        serialize_String_Generic(FluidRegistry.getFluidName(value), acc);
+    }
+
     default Fluid unserialize_Fluid_Generic(ByteBuf buf) {
         return FluidRegistry.getFluid(unserialize_String_Generic(buf));
+    }
+
+    default void serialize_ResourceLocation_Generic(ResourceLocation value, ByteBuf acc) {
+        serialize_String_Generic(value.toString(), acc);
     }
 
     default ResourceLocation unserialize_ResourceLocation_Generic(ByteBuf buf) {
