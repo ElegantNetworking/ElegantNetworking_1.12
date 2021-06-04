@@ -65,19 +65,19 @@ public interface ISerializer<Packet> extends ISerializerBase<Packet> {
     }
 
     default void serialize_Item_Generic(Item value, ByteBuf acc) {
-        acc.writeShort(Item.getIdFromItem(value));
+        acc.writeInt(Item.getIdFromItem(value));
     }
 
     default Item unserialize_Item_Generic(ByteBuf buf) {
-        return Item.getItemById(buf.readShort());
+        return Item.getItemById(buf.readInt());
     }
 
     default void serialize_Block_Generic(Block value, ByteBuf acc) {
-        acc.writeShort(Block.getIdFromBlock(value));
+        acc.writeInt(Block.getIdFromBlock(value));
     }
 
     default Block unserialize_Block_Generic(ByteBuf buf) {
-        return Block.getBlockById(buf.readShort());
+        return Block.getBlockById(buf.readInt());
     }
 
     default void serialize_Fluid_Generic(Fluid value, ByteBuf acc) {
