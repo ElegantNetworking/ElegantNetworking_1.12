@@ -1,5 +1,6 @@
 package hohserg.elegant.networking.impl;
 
+import com.google.common.base.Preconditions;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -25,11 +26,13 @@ public interface ISerializer<Packet> extends ISerializerBase<Packet> {
     }
 
     default void serialize_NBTTagCompound_Generic(NBTTagCompound value, ByteBuf acc) {
+        Preconditions.checkNotNull(value);
         ByteBufUtils.writeTag(acc, value);
     }
 
     default NBTTagCompound unserialize_NBTTagCompound_Generic(ByteBuf buf) {
-        return ByteBufUtils.readTag(buf);
+        NBTTagCompound value = ByteBufUtils.readTag(buf);
+        return value != null ? value : new NBTTagCompound();
     }
 
     default void serialize_ItemStack_Generic(ItemStack value, ByteBuf acc) {
