@@ -2,8 +2,6 @@ package hohserg.elegant.networking.impl;
 
 import com.google.common.base.Preconditions;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -13,7 +11,7 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
-public interface ISerializer<Packet> extends ISerializerBase<Packet> {
+public interface ISerializer<Packet> extends ISerializerBase<Packet>, RegistrableSingletonSerializer {
 
     default void serialize_BlockPos_Generic(BlockPos value, ByteBuf acc) {
         acc.writeInt(value.getX());
@@ -62,22 +60,6 @@ public interface ISerializer<Packet> extends ISerializerBase<Packet> {
             return stack;
         } else
             return null;
-    }
-
-    default void serialize_Item_Generic(Item value, ByteBuf acc) {
-        acc.writeInt(Item.getIdFromItem(value));
-    }
-
-    default Item unserialize_Item_Generic(ByteBuf buf) {
-        return Item.getItemById(buf.readInt());
-    }
-
-    default void serialize_Block_Generic(Block value, ByteBuf acc) {
-        acc.writeInt(Block.getIdFromBlock(value));
-    }
-
-    default Block unserialize_Block_Generic(ByteBuf buf) {
-        return Block.getBlockById(buf.readInt());
     }
 
     default void serialize_Fluid_Generic(Fluid value, ByteBuf acc) {
