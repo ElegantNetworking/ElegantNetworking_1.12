@@ -108,7 +108,7 @@ configurations {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2855'
-    compile fg.deobf("codechicken:CodeChickenLib:1.12.2-3.2.3.358:universal")
+    compileOnly fg.deobf("codechicken:CodeChickenLib:1.12.2-3.2.3.358:universal")
 
     compile(project(':ElegantNetworkingCommon')) { transitive = false }
     extraLibs project(':ElegantNetworkingCommon')
