@@ -2,7 +2,6 @@ package hohserg.elegant.networking.impl;
 
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.Logger;
 
@@ -15,15 +14,11 @@ public class Main {
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         log = event.getModLog();
-        config = Init.initConfig(event.getModConfigurationDirectory());
+        config = Config.init(event.getModConfigurationDirectory());
     }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        Init.initPackets(log::info, log::error, Network.getNetwork()::registerChannel);
-    }
-
-    @Mod.EventHandler
-    public void postInit(FMLPostInitializationEvent event) {
+        Init.initPackets(log::info, Network.getNetwork()::registerChannel);
     }
 }

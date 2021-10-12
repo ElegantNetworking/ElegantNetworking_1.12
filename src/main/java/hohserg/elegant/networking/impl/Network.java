@@ -11,7 +11,10 @@ import net.minecraftforge.fml.relauncher.Side;
 
 public interface Network<PacketRepresentation> {
 
-    Network defaultImpl = Loader.isModLoaded("codechickenlib") ? new CCLNetworkImpl() : new ForgeNetworkImpl();
+    Network defaultImpl =
+            Main.config.getBackgroundPacketSystem() == Config.BackgroundPacketSystem.CCLImpl && Loader.isModLoaded("codechickenlib") ?
+                    new CCLNetworkImpl() :
+                    new ForgeNetworkImpl();
 
     static Network getNetwork() {
         return defaultImpl;
