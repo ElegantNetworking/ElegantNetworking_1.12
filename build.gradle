@@ -15,7 +15,6 @@ buildscript {
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
-        //classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
         classpath 'net.ltgt.gradle:gradle-apt-plugin:0.9'
     }
 }
@@ -117,9 +116,11 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.8', project(':ElegantNetworkingAnnotationProcessor')
 }
 
+
 compileJava {
     options.compilerArgs += [
-            '-Aelegantnetworking.printDetails'
+            '-Aelegantnetworking.printDetails',
+            '-Aelegantnetworking.printDebug'
     ]
 }
 
