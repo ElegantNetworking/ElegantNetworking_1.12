@@ -16,38 +16,42 @@ import net.minecraftforge.fml.relauncher.Side;
 public class CCLNetworkImpl implements Network<PacketCustom> {
 
     @Override
-    public void sendToPlayer(ServerToClientPacket serverToClientPacket, EntityPlayerMP player) {
-        preparePacket(serverToClientPacket).sendToPlayer(player);
+    public void sendToPlayer(ServerToClientPacket packet, EntityPlayerMP player) {
+        checkSendingSide(packet);
+        preparePacket(packet).sendToPlayer(player);
     }
 
     @Override
-    public void sendToClients(ServerToClientPacket serverToClientPacket) {
-        preparePacket(serverToClientPacket).sendToClients();
+    public void sendToClients(ServerToClientPacket packet) {
+        checkSendingSide(packet);
+        preparePacket(packet).sendToClients();
     }
 
     @Override
-    public void sendPacketToAllAround(ServerToClientPacket serverToClientPacket, World world, double x, double y, double z, double range) {
-        preparePacket(serverToClientPacket).sendPacketToAllAround(x, y, z, range, world.provider.getDimension());
+    public void sendPacketToAllAround(ServerToClientPacket packet, World world, double x, double y, double z, double range) {
+        checkSendingSide(packet);
+        preparePacket(packet).sendPacketToAllAround(x, y, z, range, world.provider.getDimension());
     }
 
     @Override
-    public void sendToDimension(ServerToClientPacket serverToClientPacket, World world) {
-        preparePacket(serverToClientPacket).sendToDimension(world.provider.getDimension());
+    public void sendToDimension(ServerToClientPacket packet, World world) {
+        checkSendingSide(packet);
+        preparePacket(packet).sendToDimension(world.provider.getDimension());
     }
 
     @Override
-    public void sendToChunk(ServerToClientPacket serverToClientPacket, World world, int chunkX, int chunkZ) {
-        preparePacket(serverToClientPacket).sendToChunk(world, chunkX, chunkZ);
+    public void sendToChunk(ServerToClientPacket packet, World world, int chunkX, int chunkZ) {
+        checkSendingSide(packet);
+        preparePacket(packet).sendToChunk(world, chunkX, chunkZ);
     }
 
     @Override
     public void sendToServer(ClientToServerPacket packet) {
+        checkSendingSide(packet);
         preparePacket(packet).sendToServer();
     }
 
     private PacketCustom preparePacket(IByteBufSerializable packet) {
-        checkSendingSide(packet);
-
         String packetClassName = packet.getClass().getName();
         ISerializerBase serializer = Registry.getSerializer(packetClassName);
         String channel = Registry.getChannelForPacket(packetClassName);

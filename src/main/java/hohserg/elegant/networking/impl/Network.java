@@ -1,7 +1,6 @@
 package hohserg.elegant.networking.impl;
 
 import hohserg.elegant.networking.api.ClientToServerPacket;
-import hohserg.elegant.networking.api.IByteBufSerializable;
 import hohserg.elegant.networking.api.ServerToClientPacket;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.World;
@@ -20,17 +19,17 @@ public interface Network<PacketRepresentation> {
         return defaultImpl;
     }
 
-    void sendToPlayer(ServerToClientPacket serverToClientPacket, EntityPlayerMP player);
+    void sendToPlayer(ServerToClientPacket packet, EntityPlayerMP player);
 
-    void sendToClients(ServerToClientPacket serverToClientPacket);
+    void sendToClients(ServerToClientPacket packet);
 
-    void sendPacketToAllAround(ServerToClientPacket serverToClientPacket, World world, double x, double y, double z, double range);
+    void sendPacketToAllAround(ServerToClientPacket packet, World world, double x, double y, double z, double range);
 
-    void sendToDimension(ServerToClientPacket serverToClientPacket, World world);
+    void sendToDimension(ServerToClientPacket packet, World world);
 
-    void sendToChunk(ServerToClientPacket serverToClientPacket, World world, int chunkX, int chunkZ);
+    void sendToChunk(ServerToClientPacket packet, World world, int chunkX, int chunkZ);
 
-    void sendToServer(ClientToServerPacket clientToServerPacket);
+    void sendToServer(ClientToServerPacket packet);
 
     void onReceiveClient(PacketRepresentation packetRepresent, String channel);
 
@@ -38,13 +37,13 @@ public interface Network<PacketRepresentation> {
 
     void registerChannel(String channel);
 
-    default void checkSendingSide(IByteBufSerializable packet) {
-        Side side = FMLCommonHandler.instance().getEffectiveSide();
-
-        if (side == Side.CLIENT && packet instanceof ServerToClientPacket)
+    default void checkSendingSide(ServerToClientPacket packet) {
+        if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT)
             throw new RuntimeException("Attempt to send ServerToClientPacket from client side: " + packet.getClass().getCanonicalName());
-        else if (side == Side.SERVER && packet instanceof ClientToServerPacket)
-            throw new RuntimeException("Attempt to send ClientToServerPacket from server side: " + packet.getClass().getCanonicalName());
     }
 
+    default void checkSendingSide(ClientToServerPacket packet) {
+        if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
+            throw new RuntimeException("Attempt to send ClientToServerPacket from server side: " + packet.getClass().getCanonicalName());
+    }
 }

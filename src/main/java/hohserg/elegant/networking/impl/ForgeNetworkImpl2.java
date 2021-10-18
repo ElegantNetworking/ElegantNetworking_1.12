@@ -23,28 +23,28 @@ import java.util.Map;
 
 public class ForgeNetworkImpl2 implements Network<ByteBuf> {
     @Override
-    public void sendToPlayer(ServerToClientPacket serverToClientPacket, EntityPlayerMP player) {
-        getChannel(serverToClientPacket).sendTo(preparePacket(serverToClientPacket), player);
+    public void sendToPlayer(ServerToClientPacket packet, EntityPlayerMP player) {
+        getChannel(packet).sendTo(preparePacket(packet), player);
     }
 
     @Override
-    public void sendToClients(ServerToClientPacket serverToClientPacket) {
-        getChannel(serverToClientPacket).sendToAll(preparePacket(serverToClientPacket));
+    public void sendToClients(ServerToClientPacket packet) {
+        getChannel(packet).sendToAll(preparePacket(packet));
     }
 
     @Override
-    public void sendPacketToAllAround(ServerToClientPacket serverToClientPacket, World world, double x, double y, double z, double range) {
-        getChannel(serverToClientPacket).sendToAllAround(preparePacket(serverToClientPacket), new NetworkRegistry.TargetPoint(world.provider.getDimension(), x, y, z, range));
+    public void sendPacketToAllAround(ServerToClientPacket packet, World world, double x, double y, double z, double range) {
+        getChannel(packet).sendToAllAround(preparePacket(packet), new NetworkRegistry.TargetPoint(world.provider.getDimension(), x, y, z, range));
     }
 
     @Override
-    public void sendToDimension(ServerToClientPacket serverToClientPacket, World world) {
-        getChannel(serverToClientPacket).sendToDimension(preparePacket(serverToClientPacket), world.provider.getDimension());
+    public void sendToDimension(ServerToClientPacket packet, World world) {
+        getChannel(packet).sendToDimension(preparePacket(packet), world.provider.getDimension());
     }
 
     @Override
-    public void sendToChunk(ServerToClientPacket serverToClientPacket, World world, int chunkX, int chunkZ) {
-        getChannel(serverToClientPacket).sendToAllAround(preparePacket(serverToClientPacket), new NetworkRegistry.TargetPoint(world.provider.getDimension(), chunkX << 4, 0, chunkZ << 4, 256));
+    public void sendToChunk(ServerToClientPacket packet, World world, int chunkX, int chunkZ) {
+        getChannel(packet).sendToAllAround(preparePacket(packet), new NetworkRegistry.TargetPoint(world.provider.getDimension(), chunkX << 4, 0, chunkZ << 4, 256));
     }
 
     private FMLProxyPacket preparePacket(IByteBufSerializable serverToClientPacket) {

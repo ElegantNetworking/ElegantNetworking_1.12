@@ -23,34 +23,34 @@ import java.util.Map;
 
 public class ForgeNetworkImpl implements Network<ForgeNetworkImpl.UniversalPacket> {
     @Override
-    public void sendToPlayer(ServerToClientPacket serverToClientPacket, EntityPlayerMP player) {
-        getChannel(serverToClientPacket).sendTo(preparePacket(serverToClientPacket), player);
-    }
-
-    private SimpleNetworkWrapper getChannel(IByteBufSerializable packet) {
+    public void sendToPlayer(ServerToClientPacket packet, EntityPlayerMP player) {
         checkSendingSide(packet);
-        return channels.get(Registry.getChannelForPacket(packet.getClass().getName()));
+        getChannel(packet).sendTo(preparePacket(packet), player);
     }
 
     @Override
-    public void sendToClients(ServerToClientPacket serverToClientPacket) {
-        getChannel(serverToClientPacket).sendToAll(preparePacket(serverToClientPacket));
+    public void sendToClients(ServerToClientPacket packet) {
+        checkSendingSide(packet);
+        getChannel(packet).sendToAll(preparePacket(packet));
     }
 
     @Override
-    public void sendPacketToAllAround(ServerToClientPacket serverToClientPacket, World world, double x, double y, double z, double range) {
-        getChannel(serverToClientPacket).sendToAllAround(preparePacket(serverToClientPacket), new NetworkRegistry.TargetPoint(world.provider.getDimension(), x, y, z, range));
+    public void sendPacketToAllAround(ServerToClientPacket packet, World world, double x, double y, double z, double range) {
+        checkSendingSide(packet);
+        getChannel(packet).sendToAllAround(preparePacket(packet), new NetworkRegistry.TargetPoint(world.provider.getDimension(), x, y, z, range));
     }
 
     @Override
-    public void sendToDimension(ServerToClientPacket serverToClientPacket, World world) {
-        getChannel(serverToClientPacket).sendToDimension(preparePacket(serverToClientPacket), world.provider.getDimension());
+    public void sendToDimension(ServerToClientPacket packet, World world) {
+        checkSendingSide(packet);
+        getChannel(packet).sendToDimension(preparePacket(packet), world.provider.getDimension());
     }
 
     @Override
-    public void sendToChunk(ServerToClientPacket serverToClientPacket, World world, int chunkX, int chunkZ) {
-        SimpleNetworkWrapper channel = getChannel(serverToClientPacket);
-        ServerToClientUniversalPacket message = preparePacket(serverToClientPacket);
+    public void sendToChunk(ServerToClientPacket packet, World world, int chunkX, int chunkZ) {
+        checkSendingSide(packet);
+        SimpleNetworkWrapper channel = getChannel(packet);
+        ServerToClientUniversalPacket message = preparePacket(packet);
 
         PlayerChunkMapEntry playerInstance = ((WorldServer) world).getPlayerChunkMap().getEntry(chunkX, chunkZ);
         if (playerInstance != null)
@@ -60,7 +60,12 @@ public class ForgeNetworkImpl implements Network<ForgeNetworkImpl.UniversalPacke
 
     @Override
     public void sendToServer(ClientToServerPacket packet) {
+        checkSendingSide(packet);
         getChannel(packet).sendToServer(preparePacket(packet));
+    }
+
+    private SimpleNetworkWrapper getChannel(IByteBufSerializable packet) {
+        return channels.get(Registry.getChannelForPacket(packet.getClass().getName()));
     }
 
     private ServerToClientUniversalPacket preparePacket(ServerToClientPacket packet) {
