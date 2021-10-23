@@ -11,10 +11,16 @@ import net.minecraftforge.fml.relauncher.Side;
 public interface Network<PacketRepresentation> {
 
     Network defaultImpl =
-            Main.config.getBackgroundPacketSystem() == Config.BackgroundPacketSystem.CCLImpl && Loader.isModLoaded("codechickenlib") ?
-                    new CCLNetworkImpl() :
+            Main.config.getBackgroundPacketSystem() == Config.BackgroundPacketSystem.CCLImpl ?
+                    Loader.isModLoaded("codechickenlib") ?
+                            new CCLNetworkImpl() :
+                            throwMissingCCL()
+                    :
                     new ForgeNetworkImpl();
 
+    static Network throwMissingCCL() {
+        throw new RuntimeException("Missed CodeChickenLib which required by elegant_networking.cfg");
+    }
     static Network getNetwork() {
         return defaultImpl;
     }
