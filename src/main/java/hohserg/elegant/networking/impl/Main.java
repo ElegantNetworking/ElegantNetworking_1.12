@@ -19,6 +19,6 @@ public class Main {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        Init.initPackets(log::info, log::warn, Network.getNetwork()::registerChannel);
+        Init.initPackets(log::info, log::warn, Network.getNetwork()::registerChannel, config);
     }
 }
