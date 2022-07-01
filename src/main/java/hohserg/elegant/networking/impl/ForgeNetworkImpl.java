@@ -69,17 +69,15 @@ public class ForgeNetworkImpl implements Network<ForgeNetworkImpl.UniversalPacke
     }
 
     private ServerToClientUniversalPacket preparePacket(ServerToClientPacket packet) {
-        String packetClassName = packet.getClass().getName();
-        String channel = Registry.getChannelForPacket(packetClassName);
-        int id = Registry.getPacketId(packetClassName);
+        String channel = Registry.getChannelForPacket(packet.getClass().getName());
+        int id = Registry.getPacketId(packet.getClass());
 
         return new ServerToClientUniversalPacket(id, channel, packet);
     }
 
     private ClientToServerUniversalPacket preparePacket(ClientToServerPacket packet) {
-        String packetClassName = packet.getClass().getName();
-        String channel = Registry.getChannelForPacket(packetClassName);
-        int id = Registry.getPacketId(packetClassName);
+        String channel = Registry.getChannelForPacket(packet.getClass().getName());
+        int id = Registry.getPacketId(packet.getClass());
 
         return new ClientToServerUniversalPacket(id, channel, packet);
     }
