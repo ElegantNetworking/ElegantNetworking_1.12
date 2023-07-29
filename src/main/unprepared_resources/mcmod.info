@@ -1,0 +1,18 @@
+[
+  {
+    "modid": "elegant_networking",
+    "name": "ElegantNetworking",
+    "description": "This is library of useful network system for minecraft modding",
+    "version": "${mod_version}",
+    "mcversion": "1.12.2",
+    "url": "",
+    "updateUrl": "",
+    "authorList": [
+      "hohserg"
+    ],
+    "credits": "Thx Dahaka for discussions \nThx @tox1cozZ for drew my attention to the annotations processors \nThx @Plasticable for advice about using 4.4.1 version of gradle \nThx @Icosider for consulting on setting up a gradle \nThx to everyone who uses this framework",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
